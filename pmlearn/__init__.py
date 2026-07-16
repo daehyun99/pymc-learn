@@ -16,4 +16,5 @@ __all__ = ['gaussian_process',
            'linear_model',
            'mixture',
            'neural_network',
-           'naive_bayes']
+           'naive_bayes',
+           'factors']
