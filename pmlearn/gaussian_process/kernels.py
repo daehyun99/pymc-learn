@@ -5,11 +5,11 @@
 #
 # License: BSD 3 clause
 
-import pymc3 as pm
+import pymc as pm
 
 
 class RBF(pm.gp.cov.ExpQuad):
-    """Radial-basis function kernel from ``pymc3.gp.cov.ExpQuad``
+    """Radial-basis function kernel from ``pymc.gp.cov.ExpQuad``
 
     The RBF kernel is a stationary kernel. It is also known as the
     "squared exponential" kernel. It is parameterized by a length-scale
@@ -28,7 +28,7 @@ class RBF(pm.gp.cov.ExpQuad):
 
 
 class DotProduct(pm.gp.cov.Exponential):
-    """Dot-Product kernel from ``pymc3.gp.cov.Exponential``
+    """Dot-Product kernel from ``pymc.gp.cov.Exponential``
 
     The DotProduct kernel is non-stationary and can be obtained from linear
     regression by putting N(0, 1) priors on the coefficients of x_d (d = 1, . .
@@ -46,7 +46,7 @@ class DotProduct(pm.gp.cov.Exponential):
 
 
 class WhiteKernel(pm.gp.cov.WhiteNoise):
-    """White kernel from ``pymc3.gp.cov.WhiteNoise..
+    """White kernel from ``pymc.gp.cov.WhiteNoise..
 
     The main use-case of this kernel is as part of a sum-kernel where it
     explains the noise-component of the signal. Tuning its parameter

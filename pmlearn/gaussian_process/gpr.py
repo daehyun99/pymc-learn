@@ -5,8 +5,8 @@
 # License: BSD 3 clause
 
 import numpy as np
-import pymc3 as pm
-import theano
+import pymc as pm
+import pytensor
 
 from ..exceptions import NotFittedError
 from ..base import BayesianModel, BayesianRegressorMixin
@@ -46,9 +46,9 @@ class GaussianProcessRegressorMixin(BayesianRegressorMixin):
 
         with self.cached_model:
             f_pred = self.gp.conditional("f_pred", X)
-            self.ppc = pm.sample_ppc(self.trace,
+            self.ppc = pm.sample_posterior_predictive(self.trace,
                                      vars=[f_pred],
-                                     samples=2000)
+                                     return_inferencedata=False)
 
         if return_std:
             return self.ppc['f_pred'].mean(axis=0), \
@@ -59,7 +59,7 @@ class GaussianProcessRegressorMixin(BayesianRegressorMixin):
 
 class GaussianProcessRegressor(BayesianModel,
                                GaussianProcessRegressorMixin):
-    """ Gaussian Process Regression built using PyMC3.
+    """ Gaussian Process Regression built using PyMC.
 
     Fit a Gaussian process model and estimate model parameters using
     MCMC algorithms or Variational Inference algorithms
@@ -104,20 +104,20 @@ class GaussianProcessRegressor(BayesianModel,
         super(GaussianProcessRegressor, self).__init__()
 
     def create_model(self):
-        """ Creates and returns the PyMC3 model.
+        """ Creates and returns the PyMC model.
 
         Note: The size of the shared variables must match the size of the
         training data. Otherwise, setting the shared variables later will
-        raise an error. See http://docs.pymc.io/advanced_theano.html
+        raise an error. See http://docs.pymc.io/advanced_pytensor.html
 
         Returns
         ----------
-        model: the PyMC3 model.
+        model: the PyMC model.
         """
-        model_input = theano.shared(np.zeros([self.num_training_samples,
+        model_input = pytensor.shared(np.zeros([self.num_training_samples,
                                               self.num_pred]))
 
-        model_output = theano.shared(np.zeros(self.num_training_samples))
+        model_output = pytensor.shared(np.zeros(self.num_training_samples))
 
         self.shared_vars = {
             'model_input': model_input,
@@ -151,7 +151,7 @@ class GaussianProcessRegressor(BayesianModel,
 
             f = self.gp.prior('f', X=model_input.get_value())
 
-            y = pm.Normal('y', mu=f, sd=noise_variance, observed=model_output)
+            y = pm.Normal('y', mu=f, sigma=noise_variance, observed=model_output)
 
         return model
 
@@ -175,7 +175,7 @@ class GaussianProcessRegressor(BayesianModel,
 
 class StudentsTProcessRegressor(BayesianModel,
                                 GaussianProcessRegressorMixin):
-    """ StudentsT Process Regression built using PyMC3.
+    """ StudentsT Process Regression built using PyMC.
 
     Fit a StudentsT process model and estimate model parameters using
     MCMC algorithms or Variational Inference algorithms
@@ -216,20 +216,20 @@ class StudentsTProcessRegressor(BayesianModel,
         super(StudentsTProcessRegressor, self).__init__()
 
     def create_model(self):
-        """ Creates and returns the PyMC3 model.
+        """ Creates and returns the PyMC model.
 
         Note: The size of the shared variables must match the size of the
         training data. Otherwise, setting the shared variables later will raise
-        an error. See http://docs.pymc.io/advanced_theano.html
+        an error. See http://docs.pymc.io/advanced_pytensor.html
 
         Returns
         ----------
-        model : the PyMC3 model
+        model : the PyMC model
         """
-        model_input = theano.shared(np.zeros([self.num_training_samples,
+        model_input = pytensor.shared(np.zeros([self.num_training_samples,
                                               self.num_pred]))
 
-        model_output = theano.shared(np.zeros(self.num_training_samples))
+        model_output = pytensor.shared(np.zeros(self.num_training_samples))
 
         self.shared_vars = {
             'model_input': model_input,
@@ -266,7 +266,7 @@ class StudentsTProcessRegressor(BayesianModel,
 
             f = self.gp.prior('f', X=model_input.get_value())
 
-            y = pm.StudentT('y', mu=f, lam=1 / signal_variance,
+            y = pm.StudentT('y', mu=f, sigma=signal_variance,
                             nu=degrees_of_freedom, observed=model_output)
 
         return model
@@ -291,7 +291,7 @@ class StudentsTProcessRegressor(BayesianModel,
 
 class SparseGaussianProcessRegressor(BayesianModel,
                                      GaussianProcessRegressorMixin):
-    """ Sparse Gaussian Process Regression built using PyMC3.
+    """ Sparse Gaussian Process Regression built using PyMC.
 
     Fit a Sparse Gaussian process model and estimate model parameters using
     MCMC algorithms or Variational Inference algorithms
@@ -332,20 +332,20 @@ class SparseGaussianProcessRegressor(BayesianModel,
         super(SparseGaussianProcessRegressor, self).__init__()
 
     def create_model(self):
-        """ Creates and returns the PyMC3 model.
+        """ Creates and returns the PyMC model.
 
         Note: The size of the shared variables must match the size of the
         training data. Otherwise, setting the shared variables later will
-        raise an error. See http://docs.pymc.io/advanced_theano.html
+        raise an error. See http://docs.pymc.io/advanced_pytensor.html
 
         Returns
         ----------
-        model : the PyMC3 model
+        model : the PyMC model
         """
-        model_input = theano.shared(np.zeros([self.num_training_samples,
+        model_input = pytensor.shared(np.zeros([self.num_training_samples,
                                               self.num_pred]))
 
-        model_output = theano.shared(np.zeros(self.num_training_samples))
+        model_output = pytensor.shared(np.zeros(self.num_training_samples))
 
         self.shared_vars = {
             'model_input': model_input,

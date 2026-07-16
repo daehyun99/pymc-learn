@@ -11,8 +11,8 @@ import shutil
 import tempfile
 
 import numpy as np
-import pymc3 as pm
-from pymc3 import summary
+import pymc as pm
+from pymc import summary
 from sklearn.gaussian_process import \
     GaussianProcessRegressor as skGaussianProcessRegressor
 from sklearn.model_selection import train_test_split
@@ -63,7 +63,7 @@ class TestGaussianProcessRegressor(object):
 
 class TestGaussianProcessRegressorFit(TestGaussianProcessRegressor):
     def test_advi_fit_returns_correct_model(self):
-        # This print statement ensures PyMC3 output won't overwrite
+        # This print statement ensures PyMC output won't overwrite
         # the test name
         print('')
         self.advi_gpr.fit(self.X_train, self.y_train,
@@ -183,7 +183,7 @@ class TestStudentsTProcessRegressor(object):
 
 class TestStudentsTProcessRegressorFit(TestStudentsTProcessRegressor):
     def test_advi_fit_returns_correct_model(self):
-        # This print statement ensures PyMC3 output won't overwrite
+        # This print statement ensures PyMC output won't overwrite
         # the test name
         print('')
         self.advi_stpr.fit(self.X_train, self.y_train,
@@ -302,7 +302,7 @@ class TestSparseGaussianProcessRegressor(object):
 
 class TestSparseGaussianProcessRegressorFit(TestSparseGaussianProcessRegressor):
     def test_advi_fit_returns_correct_model(self):
-        # This print statement ensures PyMC3 output won't overwrite
+        # This print statement ensures PyMC output won't overwrite
         # the test name
         print('')
         self.advi_sgpr.fit(self.X_train, self.y_train)

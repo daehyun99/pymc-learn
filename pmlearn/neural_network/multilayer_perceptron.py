@@ -7,16 +7,16 @@ Multilayer perceptron
 # License: BSD 3 clause
 
 import numpy as np
-import pymc3 as pm
-import theano
+import pymc as pm
+import pytensor
 
 from ..base import BayesianModel, BayesianClassifierMixin
 
-floatX = theano.config.floatX
+floatX = pytensor.config.floatX
 
 
 class MLPClassifier(BayesianModel, BayesianClassifierMixin):
-    """ Multilayer perceptron classification built using PyMC3.
+    """ Multilayer perceptron classification built using PyMC.
 
     Fit a Multilayer perceptron classification model and estimate
     model parameters using
@@ -49,10 +49,10 @@ class MLPClassifier(BayesianModel, BayesianClassifierMixin):
         -------
 
         """
-        model_input = theano.shared(np.zeros([self.num_training_samples,
+        model_input = pytensor.shared(np.zeros([self.num_training_samples,
                                               self.num_pred]))
 
-        model_output = theano.shared(np.zeros(self.num_training_samples))
+        model_output = pytensor.shared(np.zeros(self.num_training_samples))
 
         self.shared_vars = {
             'model_input': model_input,
@@ -70,17 +70,17 @@ class MLPClassifier(BayesianModel, BayesianClassifierMixin):
 
         with model:
             # Weights from input to hidden layer
-            weights_in_1 = pm.Normal('w_in_1', 0, sd=1,
+            weights_in_1 = pm.Normal('w_in_1', 0, sigma=1,
                                      shape=(self.num_pred, self.n_hidden),
                                      testval=init_1)
 
             # Weights from 1st to 2nd layer
-            weights_1_2 = pm.Normal('w_1_2', 0, sd=1,
+            weights_1_2 = pm.Normal('w_1_2', 0, sigma=1,
                                     shape=(self.n_hidden, self.n_hidden),
                                     testval=init_2)
 
             # Weights from hidden layer to output
-            weights_2_out = pm.Normal('w_2_out', 0, sd=1,
+            weights_2_out = pm.Normal('w_2_out', 0, sigma=1,
                                       shape=(self.n_hidden,),
                                       testval=init_out)
 

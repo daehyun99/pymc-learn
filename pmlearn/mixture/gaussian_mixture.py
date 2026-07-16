@@ -5,16 +5,16 @@
 # License: BSD 3 clause
 
 import numpy as np
-import pymc3 as pm
-import theano
-import theano.tensor as tt
+import pymc as pm
+import pytensor
+import pytensor.tensor as tt
 
 from ..base import BayesianModel, BayesianDensityMixin
 
 
 class GaussianMixture(BayesianModel, BayesianDensityMixin):
     """
-    Custom Gaussian Mixture Model built using PyMC3.
+    Custom Gaussian Mixture Model built using PyMC.
     """
 
     def __init__(self):
@@ -23,22 +23,22 @@ class GaussianMixture(BayesianModel, BayesianDensityMixin):
 
     def create_model(self):
         """
-        Creates and returns the PyMC3 model.
+        Creates and returns the PyMC model.
 
         Note: The size of the shared variables must match the size of the
         training data. Otherwise, setting the shared variables later will raise
-        an error. See http://docs.pymc.io/advanced_theano.html
+        an error. See http://docs.pymc.io/advanced_pytensor.html
 
         Returns
         ----------
-        the PyMC3 model
+        the PyMC model
         """
-        model_input = theano.shared(np.zeros([self.num_training_samples,
+        model_input = pytensor.shared(np.zeros([self.num_training_samples,
                                               self.num_pred]))
 
-        # model_output = theano.shared(np.zeros(self.num_training_samples))
+        # model_output = pytensor.shared(np.zeros(self.num_training_samples))
 
-        model_components = theano.shared(np.zeros(self.num_training_samples,
+        model_components = pytensor.shared(np.zeros(self.num_training_samples,
                                                   dtype='int'))
 
         self.shared_vars = {
@@ -64,7 +64,8 @@ class GaussianMixture(BayesianModel, BayesianDensityMixin):
                 'cluster_variance_{}'.format(k),
                 n=D,
                 eta=2.,
-                sd_dist=pm.HalfNormal.dist(sd=1.)) for k in range(K)])
+                sd_dist=pm.HalfNormal.dist(sigma=1.),
+                compute_corr=False) for k in range(K)])
             chol = tt.stack([pm.expand_packed_triangular(
                 D, lower[k]) for k in range(K)])
 

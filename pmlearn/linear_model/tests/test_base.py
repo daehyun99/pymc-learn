@@ -11,7 +11,7 @@ import shutil
 import tempfile
 
 import numpy as np
-from pymc3 import summary
+from pymc import summary
 from sklearn.linear_model import LinearRegression as skLinearRegression
 from sklearn.model_selection import train_test_split
 
@@ -46,7 +46,7 @@ class TestLinearRegression(object):
 
 class TestLinearRegressionFit(TestLinearRegression):
     def test_advi_fit_returns_correct_model(self):
-        # Note: print is here so PyMC3 output won't overwrite the test name
+        # Note: print is here so PyMC output won't overwrite the test name
         print('')
         self.advi_lr.fit(self.X_train, self.y_train)
 
@@ -63,7 +63,7 @@ class TestLinearRegressionFit(TestLinearRegression):
                                 decimal=1)
 
     def test_nuts_fit_returns_correct_model(self):
-        # Note: print is here so PyMC3 output won't overwrite the test name
+        # Note: print is here so PyMC output won't overwrite the test name
         print('')
         self.nuts_lr.fit(self.X_train, self.y_train, inference_type='nuts',
                          inference_args={'draws': 2000})

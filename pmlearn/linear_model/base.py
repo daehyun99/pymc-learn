@@ -7,9 +7,9 @@ Generalized Linear models.
 # License: BSD 3 clause
 
 import numpy as np
-import pymc3 as pm
-import theano
-import theano.tensor as tt
+import pymc as pm
+import pytensor
+import pytensor.tensor as tt
 from sklearn.base import ClassifierMixin
 from sklearn.metrics import accuracy_score
 
@@ -41,7 +41,7 @@ class BayesianLinearClassifierMixin(ClassifierMixin):
            ADVI, defaults to None, so minibatch is not run by default
 
         inference_args : dict, arguments to be passed to the inference methods.
-           Check the PyMC3 docs for permissable values. If no arguments are
+           Check the PyMC docs for permissable values. If no arguments are
            specified, default values will be set.
         """
         self.num_cats = len(np.unique(cats))
@@ -110,7 +110,9 @@ class BayesianLinearClassifierMixin(ClassifierMixin):
             'model_cats': cats
         })
 
-        ppc = pm.sample_ppc(self.trace, model=self.cached_model, samples=2000)
+        ppc = pm.sample_posterior_predictive(
+            self.trace, model=self.cached_model,
+            return_inferencedata=False)
 
         if return_std:
             return ppc['y'].mean(axis=0), ppc['y'].std(axis=0)
@@ -151,27 +153,27 @@ class BayesianLinearClassifierMixin(ClassifierMixin):
 
 class LinearRegression(BayesianModel, BayesianRegressorMixin):
     """
-    Linear Regression built using PyMC3.
+    Linear Regression built using PyMC.
     """
     def __init__(self):
         super(LinearRegression, self).__init__()
 
     def create_model(self):
         """
-        Creates and returns the PyMC3 model.
+        Creates and returns the PyMC model.
 
         Note: The size of the shared variables must match the size of the
         training data. Otherwise, setting the shared variables later will
-        raise an error. See http://docs.pymc.io/advanced_theano.html
+        raise an error. See http://docs.pymc.io/advanced_pytensor.html
 
         Returns
         ----------
-        the PyMC3 model
+        the PyMC model
         """
-        model_input = theano.shared(
+        model_input = pytensor.shared(
             np.zeros([self.num_training_samples, self.num_pred]))
 
-        model_output = theano.shared(np.zeros(self.num_training_samples))
+        model_output = pytensor.shared(np.zeros(self.num_training_samples))
 
         self.shared_vars = {
             'model_input': model_input,
@@ -181,14 +183,14 @@ class LinearRegression(BayesianModel, BayesianRegressorMixin):
         model = pm.Model()
 
         with model:
-            alpha = pm.Normal('alpha', mu=0, sd=100, shape=1)
-            betas = pm.Normal('betas', mu=0, sd=100, shape=(1, self.num_pred))
+            alpha = pm.Normal('alpha', mu=0, sigma=100, shape=1)
+            betas = pm.Normal('betas', mu=0, sigma=100, shape=(1, self.num_pred))
 
-            s = pm.HalfNormal('s', tau=1)
+            s = pm.HalfNormal('s', sigma=1)
 
             mean = alpha + tt.sum(betas * model_input, 1)
 
-            y = pm.Normal('y', mu=mean, sd=s, observed=model_output)
+            y = pm.Normal('y', mu=mean, sigma=s, observed=model_output)
 
         return model
 
