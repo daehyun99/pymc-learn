@@ -15,5 +15,6 @@ __version__ = '0.0.1.rc3'
 __all__ = ['gaussian_process',
            'linear_model',
            'mixture',
+           'factors',
            'neural_network',
            'naive_bayes']
