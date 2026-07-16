@@ -1,9 +1,9 @@
 import numpy as np
-# import pymc3 as pm
-from pymc3.math import logsumexp
-# import theano
-import theano.tensor as T
-from theano.tensor.nlinalg import det
+# import pymc as pm
+from pymc.math import logsumexp
+# import pytensor
+import pytensor.tensor as T
+from pytensor.tensor.nlinalg import det
 
 
 class logp_gmix(object):

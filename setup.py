@@ -6,7 +6,6 @@ from __future__ import absolute_import
 from codecs import open
 from os.path import realpath, dirname, join
 from setuptools import setup, find_packages
-import sys
 import re
 
 DISTNAME = 'pymc-learn'
@@ -18,12 +17,11 @@ URL = "https://github.com/pymc-learn/pymc-learn"
 
 classifiers = [
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 2.7',
-    'Programming Language :: Python :: 3.4',
-    'Programming Language :: Python :: 3.5',
-    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
     'Topic :: Scientific/Engineering',
     'Topic :: Scientific/Engineering :: Mathematics',
     'Operating System :: OS Independent'
@@ -38,10 +36,6 @@ REQUIREMENTS_FILE = join(PROJECT_ROOT, 'requirements.txt')
 
 with open(REQUIREMENTS_FILE) as f:
     install_reqs = f.read().splitlines()
-
-if sys.version_info < (3, 4):
-    install_reqs.append('enum34')
-
 
 def get_version():
     VERSIONFILE = join('pmlearn', '__init__.py')
@@ -79,5 +73,6 @@ if __name__ == "__main__":
         include_package_data=True,
         zip_safe=False,
         install_requires=install_reqs,
+        python_requires='>=3.11',
         classifiers=classifiers
         )

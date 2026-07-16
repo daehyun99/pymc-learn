@@ -4,8 +4,8 @@ import tempfile
 
 import numpy as np
 # import pandas as pd
-# import pymc3 as pm
-# from pymc3 import summary
+# import pymc as pm
+# from pymc import summary
 # from sklearn.mixture import BayesianGaussianMixture as skBayesianGaussianMixture
 from sklearn.model_selection import train_test_split
 
@@ -45,7 +45,7 @@ class DirichletProcessMixtureTestCase(unittest.TestCase):
 
 # class DirichletProcessMixtureFitTestCase(DirichletProcessMixtureTestCase):
 #     def test_advi_fit_returns_correct_model(self):
-#         # This print statement ensures PyMC3 output won't overwrite the test name
+#         # This print statement ensures PyMC output won't overwrite the test name
 #         print('')
 #         self.test_DPMM.fit(self.X_train)
 #
@@ -90,7 +90,7 @@ class DirichletProcessMixtureTestCase(unittest.TestCase):
 #             0)
 #
 #     def test_nuts_fit_returns_correct_model(self):
-#         # This print statement ensures PyMC3 output won't overwrite the test name
+#         # This print statement ensures PyMC output won't overwrite the test name
 #         print('')
 #         self.test_nuts_DPMM.fit(self.X_train,
 #                                 inference_type='nuts',

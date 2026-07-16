@@ -5,18 +5,17 @@
 # License: BSD 3 clause
 
 import numpy as np
-import pymc3 as pm
-import theano
-import theano.tensor as tt
+import pymc as pm
+import pytensor
+import pytensor.tensor as tt
 
 from ..exceptions import NotFittedError
 from ..base import BayesianModel, BayesianDensityMixin
-from .util import logp_gmix
 
 
 class DirichletProcessMixture(BayesianModel, BayesianDensityMixin):
     """
-    Custom Dirichlet Process Mixture Model built using PyMC3.
+    Custom Dirichlet Process Mixture Model built using PyMC.
     """
 
     def __init__(self):
@@ -25,11 +24,11 @@ class DirichletProcessMixture(BayesianModel, BayesianDensityMixin):
 
     def create_model(self):
         """
-        Creates and returns the PyMC3 model.
+        Creates and returns the PyMC model.
 
         Note: The size of the shared variables must match the size of the
         training data. Otherwise, setting the shared variables later will raise
-        an error. See http://docs.pymc.io/advanced_theano.html
+        an error. See http://docs.pymc.io/advanced_pytensor.html
 
         The DensityDist class is used as the likelihood term. The second
         argument, logp_gmix(mus, pi, np.eye(D)), is a python function which
@@ -38,14 +37,14 @@ class DirichletProcessMixture(BayesianModel, BayesianDensityMixin):
 
         Returns
         ----------
-        the PyMC3 model
+        the PyMC model
         """
-        model_input = theano.shared(np.zeros([self.num_training_samples,
+        model_input = pytensor.shared(np.zeros([self.num_training_samples,
                                               self.num_pred]))
 
-        # model_output = theano.shared(np.zeros(self.num_training_samples))
+        # model_output = pytensor.shared(np.zeros(self.num_training_samples))
 
-        # model_truncate = theano.shared(np.zeros(self.num_training_samples,
+        # model_truncate = pytensor.shared(np.zeros(self.num_training_samples,
         #                                     dtype='int'))
 
         self.shared_vars = {
@@ -105,29 +104,22 @@ class DirichletProcessMixture(BayesianModel, BayesianDensityMixin):
                 'cluster_variance_{}'.format(k),
                 n=D,
                 eta=2.,
-                sd_dist=pm.HalfNormal.dist(sd=1.)) for k in range(K)])
+                sd_dist=pm.HalfNormal.dist(sigma=1.),
+                compute_corr=False) for k in range(K)])
 
             chol = tt.stack([pm.expand_packed_triangular(
                 D, lower[k]) for k in range(K)])
 
-            component_dists = [pm.MvNormal(
-                'component_dist_%d' % k,
+            component_dists = [pm.MvNormal.dist(
                 mu=means[k],
                 chol=chol[k],
                 shape=D) for k in range(K)]
 
-            # rand = [pm.MvNormal(
-            # 'rand_{}'.format(k),
-            # mu=means[k], chol=Chol[k], shape=D) for k in range(K)]
-            rand = pm.Normal.dist(0, 1).random
-
-            X = pm.DensityDist(
+            X = pm.Mixture(
                 'X',
-                logp_gmix(
-                    mus=component_dists, pi=pi,
-                    tau=np.eye(D),
-                    num_training_samples=model_input.get_value().shape[0]),
-                observed=model_input, random=rand)
+                w=pi,
+                comp_dists=component_dists,
+                observed=model_input)
 
         return model
 
@@ -158,10 +150,10 @@ class DirichletProcessMixture(BayesianModel, BayesianDensityMixin):
         self._set_shared_vars({'model_input': X})
         _vars = self.cached_model.free_RVs[8:11]
 
-        ppc = pm.sample_ppc(self.trace,
+        ppc = pm.sample_posterior_predictive(self.trace,
                             model=self.cached_model,
                             vars=_vars,
-                            samples=2000,
+                            return_inferencedata=False,
                             size=len(X))
         return(ppc)
 

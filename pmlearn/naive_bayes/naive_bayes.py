@@ -10,9 +10,9 @@ Naive Bayes models.
 import functools as ft
 
 import numpy as np
-import pymc3 as pm
+import pymc as pm
 import scipy.stats
-import theano
+import pytensor
 
 from ..exceptions import NotFittedError
 from ..base import BayesianModel, BayesianClassifierMixin
@@ -43,7 +43,7 @@ class GaussianNBClassifierMixin(BayesianClassifierMixin):
             for ADVI. Defaults to None so minibatch is not run by default.
 
         inference_args : dict, arguments to be passed to the inference methods.
-            Check the PyMC3 documentation.
+            Check the PyMC documentation.
 
         Returns
         -------
@@ -175,7 +175,7 @@ class GaussianNBClassifierMixin(BayesianClassifierMixin):
 
 
 class GaussianNB(BayesianModel, GaussianNBClassifierMixin):
-    """Gaussian Naive Bayes (GaussianNB) classification built using PyMC3.
+    """Gaussian Naive Bayes (GaussianNB) classification built using PyMC.
 
     The Gaussian Naive Bayes algorithm assumes that the random variables
     that describe each class and each feature are independent and distributed
@@ -207,7 +207,7 @@ class GaussianNB(BayesianModel, GaussianNBClassifierMixin):
 
     def create_model(self):
         """
-        Creates and returns the PyMC3 model.
+        Creates and returns the PyMC model.
 
         We note :math:`x_{jc}` the value of the j-th element of the data
         vector :math:`x` conditioned on x belonging to the class :math:`c`.
@@ -249,7 +249,7 @@ class GaussianNB(BayesianModel, GaussianNBClassifierMixin):
 
         Returns
         -------
-        A PyMC3 model
+        A PyMC model
 
         References
         ----------
@@ -258,8 +258,8 @@ class GaussianNB(BayesianModel, GaussianNBClassifierMixin):
         """
 
         # The data
-        X = theano.shared(np.zeros((self.num_training_samples, self.num_pred)))
-        y = theano.shared(np.zeros(self.num_training_samples, dtype=int))
+        X = pytensor.shared(np.zeros((self.num_training_samples, self.num_pred)))
+        y = pytensor.shared(np.zeros(self.num_training_samples, dtype=int))
 
         self.shared_vars = {
             'model_input': X,
@@ -271,7 +271,7 @@ class GaussianNB(BayesianModel, GaussianNBClassifierMixin):
             # Priors
             alpha = np.ones(self.num_cats)
             pi = pm.Dirichlet('pi', alpha, shape=self.num_cats)
-            mu = pm.Normal('mu', mu=0, sd=100, shape=(self.num_cats,
+            mu = pm.Normal('mu', mu=0, sigma=100, shape=(self.num_cats,
                                                       self.num_pred))
             sigma = pm.HalfNormal('sigma', 100, shape=(self.num_cats,
                                                        self.num_pred))
@@ -281,7 +281,7 @@ class GaussianNB(BayesianModel, GaussianNBClassifierMixin):
                                observed=y)
 
             # The components are independent and normally distributed
-            xi = pm.Normal('xi', mu=mu[z], sd=sigma[z], observed=X)
+            xi = pm.Normal('xi', mu=mu[z], sigma=sigma[z], observed=X)
 
         return model
 

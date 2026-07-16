@@ -11,7 +11,7 @@ import shutil
 import tempfile
 
 import numpy as np
-from pymc3 import summary
+from pymc import summary
 from sklearn.model_selection import train_test_split
 
 from pmlearn.exceptions import NotFittedError
@@ -70,7 +70,7 @@ class TestHierarchicalLogisticRegression(object):
 
 class TestHierarchicalLogisticRegressionFit(TestHierarchicalLogisticRegression):
     def test_advi_fit_returns_correct_model(self):
-        # Note: print is here so PyMC3 output won't overwrite the test name
+        # Note: print is here so PyMC output won't overwrite the test name
         print('')
         self.advi_hlr.fit(self.X_train, self.y_train, self.cat_train,
                           minibatch_size=500, inference_args={"n": 50000})

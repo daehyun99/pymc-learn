@@ -7,7 +7,7 @@
 import joblib
 import numpy as np
 import matplotlib.pyplot as plt
-import pymc3 as pm
+import pymc as pm
 import seaborn as sns
 from sklearn.base import BaseEstimator
 from sklearn.base import RegressorMixin, ClassifierMixin, DensityMixin
@@ -41,7 +41,7 @@ class BayesianModel(BaseEstimator):
 
     def _set_shared_vars(self, shared_vars):
         """
-        Sets theano shared variables for the PyMC3 model.
+        Sets pytensor shared variables for the PyMC model.
         """
         for key in shared_vars.keys():
             self.shared_vars[key].set_value(shared_vars[key])
@@ -57,7 +57,7 @@ class BayesianModel(BaseEstimator):
            Defaults to 'advi'. Currently, only 'advi' and 'nuts' are supported
 
         inference_args : dict, arguments to be passed to the inference methods.
-           Check the PyMC3 docs to see what is permitted. Defaults to None.
+           Check the PyMC docs to see what is permitted. Defaults to None.
         """
         if inference_type == 'advi':
             self._advi_inference(inference_args)
@@ -73,8 +73,8 @@ class BayesianModel(BaseEstimator):
 
         Parameters
         ----------
-        inference_args : dict, arguments to be passed to the PyMC3 fit method.
-           See PyMC3 doc for permissible values.
+        inference_args : dict, arguments to be passed to the PyMC fit method.
+           See PyMC doc for permissible values.
         """
         with self.cached_model:
             inference = pm.ADVI()
@@ -91,8 +91,8 @@ class BayesianModel(BaseEstimator):
 
         Parameters
         ----------
-        inference_args : dict, arguments passed to the PyMC3 sample method.
-           See PyMC3 doc for permissible values.
+        inference_args : dict, arguments passed to the PyMC sample method.
+           See PyMC doc for permissible values.
         """
         with self.cached_model:
             step = pm.NUTS()
@@ -219,7 +219,7 @@ class BayesianRegressorMixin(RegressorMixin):
            ADVI, defaults to None, so minibatch is not run by default
 
         inference_args : dict, arguments to be passed to the inference methods.
-           Check the PyMC3 docs for permissable values. If no arguments are
+           Check the PyMC docs for permissable values. If no arguments are
            specified, default values will be set.
         """
         self.num_training_samples, self.num_pred = X.shape
@@ -276,7 +276,9 @@ class BayesianRegressorMixin(RegressorMixin):
         self._set_shared_vars({'model_input': X,
                                'model_output': np.zeros(num_samples)})
 
-        ppc = pm.sample_ppc(self.trace, model=self.cached_model, samples=2000)
+        ppc = pm.sample_posterior_predictive(
+            self.trace, model=self.cached_model,
+            return_inferencedata=False)
 
         if return_std:
             return ppc['y'].mean(axis=0), ppc['y'].std(axis=0)
@@ -305,7 +307,7 @@ class BayesianClassifierMixin(ClassifierMixin):
         for ADVI, defaults to None, so minibatch is not run by default
 
         inference_args : dict, arguments to be passed to the inference methods.
-        Check the PyMC3 docs for permissable values. If no arguments are
+        Check the PyMC docs for permissable values. If no arguments are
         specified, default values will be set.
         """
         self.num_training_samples, self.num_pred = X.shape
@@ -364,7 +366,9 @@ class BayesianClassifierMixin(ClassifierMixin):
         self._set_shared_vars({'model_input': X,
                                'model_output': np.zeros(num_samples)})
 
-        ppc = pm.sample_ppc(self.trace, model=self.cached_model, samples=2000)
+        ppc = pm.sample_posterior_predictive(
+            self.trace, model=self.cached_model,
+            return_inferencedata=False)
 
         if return_std:
             return ppc['y'].mean(axis=0), ppc['y'].std(axis=0)
@@ -410,7 +414,7 @@ class BayesianDensityMixin(DensityMixin):
         defaults to None, so minibatch is not run by default
 
         inference_args : dict, arguments to be passed to the inference methods.
-        Check the PyMC3 docs for permissable values. If no arguments are
+        Check the PyMC docs for permissable values. If no arguments are
         specified,
         default values will be set.
         """
@@ -479,10 +483,10 @@ class BayesianDensityMixin(DensityMixin):
                               shape=K)
             _vars = [pi]
 
-            ppc = pm.sample_ppc(self.trace,
+            ppc = pm.sample_posterior_predictive(self.trace,
                                 # model=self.cached_model,
                                 vars=_vars,
-                                samples=2000,
+                                return_inferencedata=False,
                                 size=len(X))
 
         if return_std:
