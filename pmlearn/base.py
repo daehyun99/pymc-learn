@@ -8,6 +8,7 @@ import joblib
 import numpy as np
 import matplotlib.pyplot as plt
 import pymc as pm
+from pymc.variational.callbacks import CheckParametersConvergence
 import seaborn as sns
 from sklearn.base import BaseEstimator
 from sklearn.base import RegressorMixin, ClassifierMixin, DensityMixin
@@ -119,7 +120,7 @@ class BayesianModel(BaseEstimator):
         if self.inference_type == 'advi':
             inference_args = {
                 'n': 200000,
-                'callbacks': [pm.callbacks.CheckParametersConvergence()]
+                'callbacks': [CheckParametersConvergence()]
             }
         elif self.inference_type == 'nuts':
             inference_args = {
