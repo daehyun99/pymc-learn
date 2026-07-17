@@ -11,10 +11,12 @@ Logistic Regression.
 """
 
 from .base import LinearRegression
+from .functional import FunctionalRegression
 from .logistic import (HierarchicalLogisticRegression,
                        LogisticRegression)
 
 
 __all__ = ['LinearRegression',
+           'FunctionalRegression',
            'HierarchicalLogisticRegression',
            'LogisticRegression']
